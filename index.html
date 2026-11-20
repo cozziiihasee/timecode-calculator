@@ -28,9 +28,9 @@ html,body{
 
 body{
   background:var(--bg);
-  color:white;
+  color:#fff;
   padding:8px;
-  padding-bottom:360px;
+  padding-bottom:320px;
 }
 
 .resultBox{
@@ -42,9 +42,9 @@ body{
 
   background:#000;
 
-  border-radius:16px;
+  border-radius:14px;
 
-  padding:12px;
+  padding:10px;
 
   text-align:center;
 
@@ -55,25 +55,27 @@ body{
 
   font-size:min(9vw,42px);
 
+  line-height:1;
+
+  font-weight:700;
+
   font-family:Consolas,monospace;
 
   color:var(--result);
-
-  font-weight:700;
 }
 
 .frames{
 
   margin-top:4px;
 
-  color:#aaa;
+  color:#999;
 
   font-size:12px;
 }
 
 .copy{
 
-  margin-top:2px;
+  margin-top:3px;
 
   color:var(--accent);
 
@@ -91,6 +93,8 @@ body{
   height:260px;
 
   overflow-y:auto;
+
+  -webkit-overflow-scrolling:touch;
 
   font-size:18px;
 
@@ -173,23 +177,23 @@ body{
 class="resultBox"
 onclick="copyResult()">
 
-<div
-id="result"
-class="result">
-00:00:00:00
-</div>
+    <div
+    id="result"
+    class="result">
+    00:00:00:00
+    </div>
 
-<div
-id="frames"
-class="frames">
-0 frames
-</div>
+    <div
+    id="frames"
+    class="frames">
+    0 frames
+    </div>
 
-<div
-id="copy"
-class="copy">
-タップでコピー
-</div>
+    <div
+    id="copy"
+    class="copy">
+    タップでコピー
+    </div>
 
 </div>
 
@@ -297,32 +301,45 @@ function enterLine(){
 
 function clearAll(){
 
-    current="";
-    lines=[];
+    current = "";
+    lines = [];
 
     refresh();
 }
 
 function refresh(){
 
+    const log =
+        document.getElementById("log");
+
+    const scrollPos =
+        log.scrollTop;
+
     const html=[];
 
     if(current !== ""){
 
         html.push(
-        `<div class="line current">${current}</div>`
+        `<div class="line current">
+        ${current}
+        </div>`
         );
     }
 
     lines.forEach(line=>{
 
         html.push(
-        `<div class="line">${line}</div>`
+        `<div class="line">
+        ${line}
+        </div>`
         );
     });
 
-    document.getElementById("log").innerHTML =
+    log.innerHTML =
         html.join("");
+
+    log.scrollTop =
+        scrollPos;
 
     recalc();
 }
@@ -331,52 +348,61 @@ function parseValue(v){
 
     if(v.length<=2){
 
-        return Number(v)*FPS;
+        return Number(v)
+        * FPS;
     }
 
     if(v.length<=4){
 
-        const mm=
+        const mm =
         parseInt(v.slice(0,-2))||0;
 
-        const ss=
+        const ss =
         parseInt(v.slice(-2))||0;
 
         return (
-            mm*60+
+            mm*60 +
             ss
         )*FPS;
     }
 
     if(v.length<=6){
 
-        const hh=
+        const hh =
         parseInt(v.slice(0,-4))||0;
 
-        const mm=
+        const mm =
         parseInt(v.slice(-4,-2))||0;
 
-        const ss=
+        const ss =
         parseInt(v.slice(-2))||0;
 
         return (
-            hh*3600+
-            mm*60+
+            hh*3600 +
+            mm*60 +
             ss
         )*FPS;
     }
 
-    v=v.padStart(8,"0");
+    v =
+        v.padStart(8,"0");
 
-    const hh=parseInt(v.slice(0,2));
-    const mm=parseInt(v.slice(2,4));
-    const ss=parseInt(v.slice(4,6));
-    const ff=parseInt(v.slice(6,8));
+    const hh =
+        parseInt(v.slice(0,2));
+
+    const mm =
+        parseInt(v.slice(2,4));
+
+    const ss =
+        parseInt(v.slice(4,6));
+
+    const ff =
+        parseInt(v.slice(6,8));
 
     return (
-        hh*3600*FPS+
-        mm*60*FPS+
-        ss*FPS+
+        hh*3600*FPS +
+        mm*60*FPS +
+        ss*FPS +
         ff
     );
 }
@@ -384,9 +410,11 @@ function parseValue(v){
 function evaluate(exp){
 
     const tokens =
-        exp.match(/\d+|[+\-*/]/g);
+    exp.match(/\d+|[+\-*/]/g);
 
-    if(!tokens) return 0;
+    if(!tokens){
+        return 0;
+    }
 
     let total=null;
     let op="+";
@@ -406,11 +434,13 @@ function evaluate(exp){
             (op==="*" || op==="/")
         ){
 
-            value=Number(t);
+            value =
+                Number(t);
 
         }else{
 
-            value=parseValue(t);
+            value =
+                parseValue(t);
         }
 
         if(total===null){
@@ -444,18 +474,23 @@ function evaluate(exp){
 
 function recalc(){
 
-    let total=0;
+    let total = 0;
 
     lines.forEach(line=>{
 
-        total+=evaluate(line);
+        total +=
+            evaluate(line);
 
     });
 
-    document.getElementById("result").innerText =
+    document
+    .getElementById("result")
+    .innerText =
         framesToTC(total);
 
-    document.getElementById("frames").innerText =
+    document
+    .getElementById("frames")
+    .innerText =
         total.toLocaleString()
         + " frames";
 }
@@ -464,33 +499,37 @@ function framesToTC(frames){
 
     let sign="";
 
-    if(frames<0){
+    if(frames < 0){
 
         sign="-";
-        frames=Math.abs(frames);
+
+        frames =
+            Math.abs(frames);
     }
 
-    const hh=
-        Math.floor(
-        frames/(3600*FPS));
+    const hh =
+    Math.floor(
+    frames/(3600*FPS));
 
-    frames%=3600*FPS;
+    frames %=
+    (3600*FPS);
 
-    const mm=
-        Math.floor(
-        frames/(60*FPS));
+    const mm =
+    Math.floor(
+    frames/(60*FPS));
 
-    frames%=60*FPS;
+    frames %=
+    (60*FPS);
 
-    const ss=
-        Math.floor(
-        frames/FPS);
+    const ss =
+    Math.floor(
+    frames/FPS);
 
-    const ff=
-        frames%FPS;
+    const ff =
+    frames % FPS;
 
     return (
-        sign+
+        sign +
         String(hh).padStart(2,"0")+":"+
         String(mm).padStart(2,"0")+":"+
         String(ss).padStart(2,"0")+":"+
@@ -507,15 +546,15 @@ async function copyResult(){
         );
 
         const obj =
-            document.getElementById("copy");
+        document.getElementById("copy");
 
         obj.innerText =
-            "コピーしました";
+        "コピーしました";
 
         setTimeout(()=>{
 
             obj.innerText =
-                "タップでコピー";
+            "タップでコピー";
 
         },1500);
 
