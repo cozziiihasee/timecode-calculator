@@ -2,207 +2,233 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>タイムコード計算機</title>
-
-<meta name="theme-color" content="#0f172a">
+<title>Nextry TC Calculator</title>
 
 <style>
 
 :root{
-    --bg:#0f172a;
-    --card:#1e293b;
-    --card2:#111827;
-    --text:#f8fafc;
-    --sub:#94a3b8;
-    --green:#22c55e;
+  --bg:#232323;
+  --panel:#2f2f2f;
+  --result:#00ff66;
+  --accent:#ff9900;
+  --text:#ffffff;
 }
 
 *{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    -webkit-tap-highlight-color:transparent;
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
 }
 
 body{
-    background:var(--bg);
-    color:var(--text);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-    padding:15px;
-    padding-bottom:30px;
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  padding:12px;
 }
 
 h1{
-    font-size:24px;
-    margin-bottom:5px;
+  font-size:22px;
+  margin-bottom:12px;
 }
 
-.subtitle{
-    color:var(--sub);
-    margin-bottom:15px;
-}
+.resultBox{
+  position:sticky;
+  top:8px;
+  z-index:100;
 
-.result-box{
-    position:sticky;
-    top:10px;
-    z-index:100;
+  background:#111;
 
-    background:var(--card2);
+  border-radius:16px;
 
-    border-radius:16px;
-    padding:18px;
+  padding:18px;
 
-    margin-bottom:15px;
+  margin-bottom:12px;
 
-    box-shadow:0 5px 20px rgba(0,0,0,.35);
-}
+  text-align:center;
 
-.result-label{
-    color:var(--sub);
-    text-align:center;
+  cursor:pointer;
 }
 
 .result{
-    text-align:center;
-    color:var(--green);
-    font-weight:700;
+  color:var(--result);
 
-    font-size:clamp(36px,10vw,56px);
+  font-size:clamp(34px,9vw,56px);
 
-    margin-top:10px;
-    word-break:break-all;
+  font-family:Consolas,monospace;
+
+  font-weight:700;
 }
 
-.copy-message{
-    text-align:center;
-    color:var(--sub);
-    font-size:12px;
-    margin-top:8px;
+.frames{
+  margin-top:8px;
+  color:#999;
+}
+
+.copyInfo{
+  color:var(--accent);
+  font-size:12px;
+  margin-top:8px;
+}
+
+.keypad{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  margin-bottom:12px;
+}
+
+.keypad button{
+
+  height:56px;
+
+  border:none;
+  border-radius:12px;
+
+  background:#444;
+
+  color:white;
+
+  font-size:20px;
+  font-weight:700;
+}
+
+.keypad button:active{
+  transform:scale(.96);
 }
 
 textarea{
 
-    width:100%;
+  width:100%;
+  min-height:280px;
 
-    min-height:320px;
+  background:var(--panel);
 
-    background:var(--card);
+  color:white;
 
-    border:none;
-    border-radius:16px;
+  border:none;
+  border-radius:16px;
 
-    color:white;
+  padding:14px;
 
-    font-size:22px;
-    line-height:1.8;
+  font-size:24px;
 
-    padding:18px;
+  line-height:1.6;
 
-    resize:vertical;
+  resize:none;
 }
 
 textarea:focus{
-    outline:none;
+  outline:2px solid var(--accent);
 }
 
-.info{
-    margin-top:15px;
+.actionButtons{
 
-    background:var(--card);
+  display:grid;
 
-    border-radius:16px;
+  grid-template-columns:1fr 1fr;
 
-    padding:15px;
+  gap:8px;
 
-    color:var(--sub);
-
-    line-height:1.8;
+  margin-top:12px;
 }
 
-.footer{
-    margin-top:15px;
+.actionButtons button{
+
+  height:56px;
+
+  border:none;
+
+  border-radius:12px;
+
+  color:white;
+
+  font-size:18px;
+
+  font-weight:700;
 }
 
-.clear{
-    width:100%;
-    height:55px;
+.newLineBtn{
+  background:#1976d2;
+}
 
-    background:#dc2626;
-
-    color:white;
-
-    border:none;
-    border-radius:12px;
-
-    font-size:18px;
+.clearBtn{
+  background:#d32f2f;
 }
 
 </style>
 </head>
-
 <body>
 
-<h1>⏱ タイムコード計算機</h1>
-
-<div class="subtitle">
-スマホ対応版
-</div>
+<h1>⏱ Nextry TC Calculator</h1>
 
 <div
-class="result-box"
+class="resultBox"
 onclick="copyResult()">
 
-    <div class="result-label">
-        計算結果（タップでコピー）
-    </div>
+  <div
+  id="result"
+  class="result">
+    00:00:00:00
+  </div>
 
-    <div id="result" class="result">
-        00:00:00:00
-    </div>
+  <div
+  id="frames"
+  class="frames">
+    0 frames
+  </div>
 
-    <div id="msg" class="copy-message">
-        タップでコピー
-    </div>
+  <div
+  id="copyInfo"
+  class="copyInfo">
+    タップでコピー
+  </div>
+
+</div>
+
+<div class="keypad">
+
+  <button onclick="insertText('+')">＋</button>
+  <button onclick="insertText('-')">－</button>
+  <button onclick="insertText('*')">×</button>
+  <button onclick="insertText('/')">÷</button>
+
+  <button onclick="insertText('\n')">↵</button>
+  <button onclick="backspace()">⌫</button>
 
 </div>
 
 <textarea
 id="input"
+inputmode="numeric"
+autocomplete="off"
+autocorrect="off"
+autocapitalize="off"
+spellcheck="false"
 oninput="calculate()"
-placeholder="入力例
+placeholder="15+30
 
-15
+2930-15-30
 
-00:15
+15*12
 
-10:00
+10000000+1500
 
-00:15+00:30
+10001500-10000000"></textarea>
 
-10:00:00:00+00:00:15:00
-
-00:30:00:00-00:00:15:00"></textarea>
-
-<div class="info">
-
-15 → 15秒<br>
-00:15 → 15秒<br>
-10:00 → 10分00秒<br>
-01:00:00 → 1時間<br>
-00:00:15:00 → 15秒00f<br>
-10:00:00:00 → 10時間00分00秒00f<br><br>
-
-改行＝加算<br>
-スペース不要
-
-</div>
-
-<div class="footer">
+<div class="actionButtons">
 
 <button
-class="clear"
+class="newLineBtn"
+onclick="insertText('\n')">
+↵ 改行
+</button>
+
+<button
+class="clearBtn"
 onclick="clearInput()">
 🗑 クリア
 </button>
@@ -213,206 +239,310 @@ onclick="clearInput()">
 
 const FPS = 30;
 
-function calculate(){
+function parseInput(value){
 
-    const lines =
-        document
-        .getElementById("input")
-        .value
-        .split("\n");
+  value = value.trim();
 
-    let totalFrames = 0;
+  if(value.length <= 2){
 
-    lines.forEach(line=>{
+    return Number(value) * FPS;
+  }
 
-        line = line.trim();
+  if(value.length <= 4){
 
-        if(line){
+    const mm =
+      parseInt(value.slice(0,-2)) || 0;
 
-            totalFrames +=
-                calculateExpression(line);
-        }
-    });
+    const ss =
+      parseInt(value.slice(-2)) || 0;
 
-    document.getElementById("result").innerText =
-        framesToTC(totalFrames);
+    return (
+      mm * 60 +
+      ss
+    ) * FPS;
+  }
+
+  if(value.length <= 6){
+
+    const hh =
+      parseInt(value.slice(0,-4)) || 0;
+
+    const mm =
+      parseInt(value.slice(-4,-2)) || 0;
+
+    const ss =
+      parseInt(value.slice(-2)) || 0;
+
+    return (
+      hh * 3600 +
+      mm * 60 +
+      ss
+    ) * FPS;
+  }
+
+  value =
+    value.padStart(8,"0");
+
+  const hh =
+    parseInt(value.slice(0,2));
+
+  const mm =
+    parseInt(value.slice(2,4));
+
+  const ss =
+    parseInt(value.slice(4,6));
+
+  const ff =
+    parseInt(value.slice(6,8));
+
+  return (
+    hh * 3600 * FPS +
+    mm * 60 * FPS +
+    ss * FPS +
+    ff
+  );
 }
 
-function calculateExpression(expression){
+function evaluateLine(line){
 
-    const tokens =
-        expression.match(
-            /\d+:\d+:\d+:\d+|\d+:\d+:\d+|\d+:\d+|[+\-]|\d+/g
-        );
+  const tokens =
+    line.match(/\d+|[+\-*/]/g);
 
-    if(!tokens) return 0;
+  if(!tokens){
+    return 0;
+  }
 
-    let total = 0;
-    let op = "+";
+  let result = null;
+  let operator = "+";
 
-    for(const token of tokens){
+  for(const token of tokens){
 
-        if(token==="+" || token==="-"){
+    if(["+","-","*","/"].includes(token)){
 
-            op = token;
-            continue;
-        }
-
-        const value =
-            parseTime(token);
-
-        if(op==="+"){
-            total += value;
-        }else{
-            total -= value;
-        }
+      operator = token;
+      continue;
     }
 
-    return total;
-}
+    let value;
 
-function parseTime(str){
+    if(
+      /^\d+$/.test(token) &&
+      result !== null &&
+      (operator === "*" || operator === "/")
+    ){
 
-    let h=0;
-    let m=0;
-    let s=0;
-    let f=0;
-
-    const p = str.split(":");
-
-    if(p.length===4){
-
-        h=parseInt(p[0]);
-        m=parseInt(p[1]);
-        s=parseInt(p[2]);
-        f=parseInt(p[3]);
-
-    }else if(p.length===3){
-
-        h=parseInt(p[0]);
-        m=parseInt(p[1]);
-        s=parseInt(p[2]);
-
-    }else if(p.length===2){
-
-        m=parseInt(p[0]);
-        s=parseInt(p[1]);
+      value = Number(token);
 
     }else{
 
-        return parseLegacy(str);
+      value = parseInput(token);
     }
 
-    return (
-        h*3600*FPS +
-        m*60*FPS +
-        s*FPS +
-        f
-    );
+    if(result === null){
+
+      result = value;
+      continue;
+    }
+
+    switch(operator){
+
+      case "+":
+        result += value;
+        break;
+
+      case "-":
+        result -= value;
+        break;
+
+      case "*":
+        result *= value;
+        break;
+
+      case "/":
+        result /= value;
+        break;
+    }
+  }
+
+  return Math.round(result || 0);
 }
 
-function parseLegacy(str){
+function calculate(){
 
-    let h=0,m=0,s=0;
+  const lines =
+    document
+    .getElementById("input")
+    .value
+    .split("\n");
 
-    switch(str.length){
+  let total = 0;
 
-        case 1:
-        case 2:
-            s=parseInt(str)||0;
-            break;
+  lines.forEach(line=>{
 
-        case 3:
-            m=parseInt(str.substring(0,1))||0;
-            s=parseInt(str.substring(1,3))||0;
-            break;
+    line = line.trim();
 
-        case 4:
-            m=parseInt(str.substring(0,2))||0;
-            s=parseInt(str.substring(2,4))||0;
-            break;
+    if(line){
 
-        case 5:
-            h=parseInt(str.substring(0,1))||0;
-            m=parseInt(str.substring(1,3))||0;
-            s=parseInt(str.substring(3,5))||0;
-            break;
-
-        case 6:
-            h=parseInt(str.substring(0,2))||0;
-            m=parseInt(str.substring(2,4))||0;
-            s=parseInt(str.substring(4,6))||0;
-            break;
+      total +=
+        evaluateLine(line);
     }
 
-    return (
-        h*3600*FPS +
-        m*60*FPS +
-        s*FPS
-    );
+  });
+
+  document
+    .getElementById("result")
+    .innerText =
+    framesToTC(total);
+
+  document
+    .getElementById("frames")
+    .innerText =
+    total.toLocaleString() + " frames";
 }
 
 function framesToTC(frames){
 
-    let sign="";
+  let sign = "";
 
-    if(frames<0){
+  if(frames < 0){
 
-        sign="-";
-        frames=Math.abs(frames);
-    }
+    sign = "-";
 
-    const h =
-        Math.floor(frames/(3600*FPS));
+    frames =
+      Math.abs(frames);
+  }
 
-    frames%=3600*FPS;
-
-    const m =
-        Math.floor(frames/(60*FPS));
-
-    frames%=60*FPS;
-
-    const s =
-        Math.floor(frames/FPS);
-
-    const f =
-        frames%FPS;
-
-    return (
-        sign +
-        String(h).padStart(2,"0")+":"+
-        String(m).padStart(2,"0")+":"+
-        String(s).padStart(2,"0")+":"+
-        String(f).padStart(2,"0")
+  const hh =
+    Math.floor(
+      frames /
+      (3600 * FPS)
     );
+
+  frames %=
+    (3600 * FPS);
+
+  const mm =
+    Math.floor(
+      frames /
+      (60 * FPS)
+    );
+
+  frames %=
+    (60 * FPS);
+
+  const ss =
+    Math.floor(
+      frames / FPS
+    );
+
+  const ff =
+    frames % FPS;
+
+  return (
+    sign +
+    String(hh).padStart(2,"0")
+    + ":" +
+    String(mm).padStart(2,"0")
+    + ":" +
+    String(ss).padStart(2,"0")
+    + ":" +
+    String(ff).padStart(2,"0")
+  );
+}
+
+function insertText(text){
+
+  const area =
+    document.getElementById("input");
+
+  const start =
+    area.selectionStart;
+
+  const end =
+    area.selectionEnd;
+
+  area.setRangeText(
+    text,
+    start,
+    end,
+    "end"
+  );
+
+  area.focus();
+
+  calculate();
+}
+
+function backspace(){
+
+  const area =
+    document.getElementById("input");
+
+  const start =
+    area.selectionStart;
+
+  const end =
+    area.selectionEnd;
+
+  if(start === end && start > 0){
+
+    area.setRangeText(
+      "",
+      start - 1,
+      start,
+      "end"
+    );
+
+  }else{
+
+    area.setRangeText(
+      "",
+      start,
+      end,
+      "end"
+    );
+  }
+
+  area.focus();
+
+  calculate();
 }
 
 function clearInput(){
 
-    document.getElementById("input").value="";
-    calculate();
+  document
+    .getElementById("input")
+    .value = "";
+
+  calculate();
 }
 
 async function copyResult(){
 
-    const text =
-        document.getElementById("result").innerText;
+  try{
 
-    try{
+    await navigator
+      .clipboard
+      .writeText(
+        document
+        .getElementById("result")
+        .innerText
+      );
 
-        await navigator.clipboard.writeText(text);
+    const obj =
+      document.getElementById("copyInfo");
 
-        document.getElementById("msg").innerText =
-            "コピーしました";
+    obj.innerText =
+      "コピーしました";
 
-        setTimeout(()=>{
+    setTimeout(()=>{
 
-            document.getElementById("msg").innerText =
-                "タップでコピー";
+      obj.innerText =
+        "タップでコピー";
 
-        },1500);
+    },1500);
 
-    }catch(e){}
+  }catch(e){}
 }
 
 calculate();
