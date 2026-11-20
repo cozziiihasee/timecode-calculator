@@ -1,422 +1,432 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#1d1d1d">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="format-detection" content="telephone=no">
-<title>TC Calc</title>
+<title>TC Calculator</title>
+
 <style>
 :root{
-  --bg:#1d1d1d;
-  --panel:#2c2c2c;
-  --tc:#5cff6b;
-  --acc:#ff9800;
-  --line:#3a3a3a;
-  --dim:#858585;
-  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono","Droid Sans Mono",monospace;
+    --bg:#1d1d1d;
+    --panel:#2c2c2c;
+    --green:#5cff6b;
+    --orange:#ff9800;
+    --text:#e0e0e0;
+    --border:#3b3b3b;
+    --safe-bottom: env(safe-area-inset-bottom,0px);
 }
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
-html,body{margin:0;padding:0;height:100%;overflow:hidden;background:var(--bg);overscroll-behavior:none;touch-action:manipulation;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Hiragino Sans",sans-serif;color:#ddd}
-.app{position:fixed;left:0;right:0;top:0;bottom:0;display:flex;flex-direction:column;background:var(--bg)}
 
-/* ---------- RESULT (fixed top) ---------- */
-.head{flex:none;background:var(--panel);border-bottom:1px solid #000;box-shadow:0 2px 0 #353535 inset;
-  padding:calc(env(safe-area-inset-top) + 8px) 12px 10px}
-.head-top{display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:.12em;color:var(--dim);margin-bottom:6px}
-.badge{color:var(--acc);border:1px solid var(--acc);border-radius:3px;padding:1px 6px;font-family:var(--mono);letter-spacing:.06em}
-.tcbox{background:#0f0f0f;border:1px solid #4a4a4a;border-radius:4px;padding:8px 12px 7px;cursor:pointer;
-  box-shadow:inset 0 0 12px rgba(0,0,0,.8)}
-.tcbox:active{background:#171717}
-.tc{font-family:var(--mono);font-weight:600;font-size:min(12vw,52px);line-height:1.1;color:var(--tc);
-  text-align:center;white-space:nowrap;font-variant-numeric:tabular-nums;letter-spacing:.02em;
-  text-shadow:0 0 14px rgba(92,255,107,.28)}
-.tc i{font-style:normal;opacity:.55}
-.tc.err{color:#ff5252;text-shadow:none}
-.fr-row{display:flex;justify-content:space-between;align-items:baseline;margin-top:3px;font-family:var(--mono)}
-.fr{font-size:17px;color:#cfcfcf;font-variant-numeric:tabular-nums}
-.hint{font-size:11px;letter-spacing:.1em;color:var(--dim);font-family:-apple-system,sans-serif}
-.hint.ok{color:var(--acc)}
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    -webkit-tap-highlight-color:transparent;
+    touch-action:manipulation;
+}
 
-/* ---------- LOG ---------- */
-.logwrap{position:relative;flex:1 1 0;min-height:0;background:var(--bg)}
-.log{position:absolute;left:0;right:0;top:0;bottom:0;overflow-y:auto;overflow-x:hidden;
-  overscroll-behavior:contain;-webkit-overflow-scrolling:touch;overflow-anchor:none;touch-action:pan-y;padding:4px 14px 8px}
-.inner{min-height:100%;display:flex;flex-direction:column}
-.spacer{flex:1 1 auto;min-height:0;padding-top:14px;font-size:12px;line-height:1.7;color:#4d4d4d;letter-spacing:.04em}
-.inner.has .spacer .tip{display:none}
-.ln{display:flex;align-items:baseline;gap:6px;padding:4px 0;border-bottom:1px solid #272727;
-  font-family:var(--mono);font-size:clamp(20px,3.4dvh,26px);font-variant-numeric:tabular-nums}
-.ln .op{flex:none;width:1.1em;text-align:center;color:var(--acc);font-weight:700}
-.ln .num{flex:1;min-width:0;color:#d4d4d4;word-break:break-all}
-.ln .aux{flex:none;font-size:13px;color:#777}
-.ln.res{margin-bottom:10px;border-top:1px dashed #4a4a4a;border-bottom:1px solid #4a4a4a;background:#232323;cursor:pointer;padding-left:4px;padding-right:4px}
-.ln.res .num{color:#fff;font-weight:700}
-.ln.res.err .num{color:#ff5252}
-.ln.live{border-bottom:none}
-.ln.live .num{color:var(--tc)}
-.ln.live .aux{color:#3f9c49}
-.ln.live .num::after{content:"";display:inline-block;width:.5em;height:1em;margin-left:2px;background:var(--tc);
-  vertical-align:-.12em;animation:blink 1s steps(2,start) infinite}
-@keyframes blink{to{visibility:hidden}}
-.jump{position:absolute;right:12px;bottom:10px;display:none;padding:7px 12px;border-radius:16px;border:1px solid #000;
-  background:var(--acc);color:#111;font-size:12px;font-weight:700;letter-spacing:.04em;box-shadow:0 2px 8px rgba(0,0,0,.6)}
-.jump.show{display:block}
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
+}
 
-/* ---------- KEYPAD (fixed bottom) ---------- */
-.keypad{flex:none;background:var(--panel);border-top:1px solid #000;box-shadow:0 1px 0 #3a3a3a inset;
-  padding:8px 8px calc(8px + env(safe-area-inset-bottom));
-  display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(6,1fr);gap:6px;
-  height:clamp(250px,46vh,400px);height:clamp(250px,46dvh,400px);touch-action:manipulation}
-.k{appearance:none;-webkit-appearance:none;margin:0;padding:0;border:1px solid #0b0b0b;border-radius:8px;
-  background:linear-gradient(#484848,#363636);color:#eee;font-family:var(--mono);font-weight:600;
-  font-size:clamp(18px,3.4dvh,28px);box-shadow:0 1px 0 #5a5a5a inset,0 1px 0 #000;
-  display:flex;align-items:center;justify-content:center;touch-action:manipulation;outline:none;cursor:pointer}
-.k.down{background:linear-gradient(#303030,#3d3d3d);transform:translateY(1px);box-shadow:0 0 0 #000 inset}
-.k.op{color:var(--acc);background:linear-gradient(#3f3f3f,#2f2f2f);font-size:clamp(22px,4dvh,32px)}
-.k.fn{color:#bdbdbd;background:linear-gradient(#3a3a3a,#2b2b2b)}
-.k.clr{color:#ff5a4d;font-size:clamp(15px,2.8dvh,22px)}
-.k.ent{background:linear-gradient(#ffab2e,#ef8300);color:#161616;border-color:#6b3d00;font-size:clamp(16px,3dvh,24px);letter-spacing:.06em}
-.k.ent.down{background:linear-gradient(#d97300,#f08a00)}
+body{
+    position:fixed;
+    inset:0;
+    user-select:none;
+}
+
+#app{
+    height:100dvh;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+}
+
+/* ===== RESULT ===== */
+
+#resultPanel{
+    flex:0 0 auto;
+    background:#111;
+    border-bottom:1px solid var(--border);
+    padding:12px;
+}
+
+#result{
+    text-align:center;
+    font-weight:700;
+    color:var(--green);
+    font-size:clamp(28px,6vw,42px);
+    line-height:1.1;
+    word-break:break-all;
+}
+
+#frames{
+    margin-top:6px;
+    text-align:center;
+    color:#bbb;
+    font-size:15px;
+}
+
+#copyMsg{
+    margin-top:4px;
+    text-align:center;
+    color:var(--orange);
+    font-size:12px;
+    height:14px;
+}
+
+/* ===== LOG ===== */
+
+#logWrap{
+    flex:1;
+    overflow:hidden;
+    background:var(--panel);
+}
+
+#log{
+    height:100%;
+    overflow-y:auto;
+    padding:12px;
+    -webkit-overflow-scrolling:touch;
+}
+
+.logItem{
+    padding:6px 4px;
+    font-size:20px;
+    color:#d0d0d0;
+    border-bottom:1px solid rgba(255,255,255,0.04);
+    word-break:break-all;
+}
+
+.current{
+    color:var(--green);
+    font-weight:700;
+}
+
+/* ===== KEYPAD ===== */
+
+#keypad{
+    flex:0 0 auto;
+    background:#222;
+    padding:8px;
+    padding-bottom:calc(8px + var(--safe-bottom));
+    border-top:1px solid var(--border);
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+}
+
+button{
+    height:58px;
+    border:none;
+    border-radius:10px;
+    background:#333;
+    color:#fff;
+    font-size:24px;
+    font-weight:700;
+}
+
+button:active{
+    transform:scale(0.96);
+}
+
+.op{
+    background:#4a4a4a;
+    color:var(--orange);
+}
+
+.ent{
+    background:var(--orange);
+    color:#000;
+}
+
+.clr{
+    background:#b00020;
+}
 </style>
 </head>
+
 <body>
-<div class="app" id="app">
 
-  <div class="head">
-    <div class="head-top"><span>TIMECODE</span><span class="badge">30 FPS · NDF</span></div>
-    <div class="tcbox" id="panel">
-      <div class="tc" id="tc">00<i>:</i>00<i>:</i>00<i>:</i>00</div>
-      <div class="fr-row"><span class="fr" id="fr">0 frames</span><span class="hint" id="hint">TAP TO COPY</span></div>
+<div id="app">
+
+    <div id="resultPanel">
+        <div id="result">00:00:00:00</div>
+        <div id="frames">0 frames</div>
+        <div id="copyMsg"></div>
     </div>
-  </div>
 
-  <div class="logwrap">
-    <div class="log" id="log">
-      <div class="inner" id="inner">
-        <div class="spacer"><div class="tip">数字だけ入力 ／ 例）1500 = 00:00:15:00<br>1500+3000 → ENT ／ 1500*12 ／ 3000/2<br>* と / の右側は倍率として扱います</div></div>
-        <div class="ln live" id="live"><span class="op"></span><span class="num"></span><span class="aux"></span></div>
-      </div>
+    <div id="logWrap">
+        <div id="log"></div>
     </div>
-    <button class="jump" id="jump" type="button" tabindex="-1">↓ 最新</button>
-  </div>
 
-  <div class="keypad" id="pad">
-    <button class="k" data-k="1" type="button" tabindex="-1">1</button>
-    <button class="k" data-k="2" type="button" tabindex="-1">2</button>
-    <button class="k" data-k="3" type="button" tabindex="-1">3</button>
-    <button class="k" data-k="4" type="button" tabindex="-1">4</button>
-    <button class="k" data-k="5" type="button" tabindex="-1">5</button>
-    <button class="k" data-k="6" type="button" tabindex="-1">6</button>
-    <button class="k" data-k="7" type="button" tabindex="-1">7</button>
-    <button class="k" data-k="8" type="button" tabindex="-1">8</button>
-    <button class="k" data-k="9" type="button" tabindex="-1">9</button>
-    <button class="k fn" data-k="sign" type="button" tabindex="-1">±</button>
-    <button class="k" data-k="0" type="button" tabindex="-1">0</button>
-    <button class="k fn" data-k="bs" type="button" tabindex="-1">⌫</button>
-    <button class="k op" data-k="*" type="button" tabindex="-1">×</button>
-    <button class="k op" data-k="/" type="button" tabindex="-1">÷</button>
-    <button class="k ent" data-k="ent" type="button" tabindex="-1">ENT</button>
-    <button class="k clr" data-k="clr" type="button" tabindex="-1">CLR</button>
-    <button class="k op" data-k="+" type="button" tabindex="-1">+</button>
-    <button class="k op" data-k="-" type="button" tabindex="-1">−</button>
-  </div>
+    <div id="keypad">
+        <div class="grid">
+            <button data-key="1">1</button>
+            <button data-key="2">2</button>
+            <button data-key="3">3</button>
+
+            <button data-key="4">4</button>
+            <button data-key="5">5</button>
+            <button data-key="6">6</button>
+
+            <button data-key="7">7</button>
+            <button data-key="8">8</button>
+            <button data-key="9">9</button>
+
+            <button id="sign">±</button>
+            <button data-key="0">0</button>
+            <button id="back">⌫</button>
+
+            <button class="op" data-key="*">×</button>
+            <button class="op" data-key="/">÷</button>
+            <button class="ent" id="ent">ENT</button>
+
+            <button class="clr" id="clr">CLR</button>
+            <button class="op" data-key="+">+</button>
+            <button class="op" data-key="-">-</button>
+        </div>
+    </div>
+
 </div>
 
 <script>
-(function(){
-'use strict';
+document.addEventListener('gesturestart', e=>e.preventDefault());
+document.addEventListener('dblclick', e=>e.preventDefault());
 
-/* ================= constants / helpers ================= */
-var FPS = 30, FPM = 1800, FPH = 108000;
-var SYM = {'+':'+','-':'−','*':'×','/':'÷'};
-function $(s){ return document.querySelector(s); }
-function pad(n){ return (n < 10 ? '0' : '') + n; }
+const FPS = 30;
 
-var tcEl = $('#tc'), frEl = $('#fr'), hintEl = $('#hint'), panelEl = $('#panel');
-var logEl = $('#log'), inner = $('#inner'), liveEl = $('#live'), jumpEl = $('#jump');
-var liveOp = liveEl.children[0], liveNum = liveEl.children[1], liveAux = liveEl.children[2];
+const resultEl = document.getElementById('result');
+const framesEl = document.getElementById('frames');
+const logEl = document.getElementById('log');
+const copyMsg = document.getElementById('copyMsg');
 
-function tcToFrames(d){
-  var s = ('00000000' + d).slice(-8);
-  return (+s.slice(0,2)) * FPH + (+s.slice(2,4)) * FPM + (+s.slice(4,6)) * FPS + (+s.slice(6,8));
-}
-function tcStr(fr){
-  var neg = fr < 0, t = Math.abs(fr);
-  var f = t % FPS, s = Math.floor(t / FPS) % 60, m = Math.floor(t / FPM) % 60, h = Math.floor(t / FPH);
-  return (neg ? '-' : '') + pad(h) + ':' + pad(m) + ':' + pad(s) + ':' + pad(f);
-}
-function makeTerm(op, digits, neg){
-  var kind = (op === '*' || op === '/') ? 'scalar' : 'tc';
-  var v = kind === 'tc' ? tcToFrames(digits) : parseInt(digits, 10);
-  if (neg) v = -v;
-  return { op: op, digits: digits, neg: neg, kind: kind, val: v, fromAns: false, el: null };
-}
-function evalItems(it){
-  var acc = it[0].val;
-  for (var i = 1; i < it.length; i++){
-    var op = it[i].op, v = it[i].val;
-    if (op === '+') acc += v;
-    else if (op === '-') acc -= v;
-    else if (op === '*') acc *= v;
-    else if (op === '/'){
-      if (v === 0) return { err: true };
-      var q = acc / v;
-      acc = Math.sign(q) * Math.round(Math.abs(q));
+let expression = "";
+let currentInput = "";
+let logs = [];
+
+function digitsToFrames(str){
+
+    str = String(Math.abs(parseInt(str || "0",10)));
+
+    let HH=0,MM=0,SS=0,FF=0;
+
+    if(str.length<=2){
+        FF = parseInt(str||0,10);
     }
-    if (!isFinite(acc) || Math.abs(acc) > 9e12) return { err: true };
-  }
-  return { v: acc };
+    else if(str.length<=4){
+        FF = parseInt(str.slice(-2),10);
+        SS = parseInt(str.slice(0,-2)||0,10);
+    }
+    else if(str.length<=6){
+        FF = parseInt(str.slice(-2),10);
+        SS = parseInt(str.slice(-4,-2)||0,10);
+        MM = parseInt(str.slice(0,-4)||0,10);
+    }
+    else{
+        FF = parseInt(str.slice(-2),10);
+        SS = parseInt(str.slice(-4,-2)||0,10);
+        MM = parseInt(str.slice(-6,-4)||0,10);
+        HH = parseInt(str.slice(0,-6)||0,10);
+    }
+
+    return (((HH*60+MM)*60)+SS)*FPS + FF;
 }
 
-/* ================= state ================= */
-var terms = [];        // committed terms of current calculation
-var pendingOp = null;  // operator in front of the entry being typed
-var entry = '';        // digits being typed
-var entryNeg = false;
-var ans = null;        // last result (frames)
-var curCopy = '00:00:00:00';
-var stick = true;      // is the log pinned to bottom?
+function framesToTC(frames){
 
-/* ================= scroll handling ================= */
-logEl.addEventListener('scroll', function(){
-  stick = (logEl.scrollHeight - logEl.scrollTop - logEl.clientHeight) < 30;
-  jumpEl.classList.toggle('show', !stick);
-}, { passive: true });
-function follow(){ if (stick) logEl.scrollTop = logEl.scrollHeight; }
-jumpEl.addEventListener('click', function(){
-  stick = true; logEl.scrollTop = logEl.scrollHeight; jumpEl.classList.remove('show');
-});
-window.addEventListener('resize', follow);
+    let sign = frames < 0 ? "-" : "";
+    frames = Math.abs(Math.round(frames));
 
-/* ================= log DOM ================= */
-function mkLine(cls, op, num, aux){
-  var d = document.createElement('div');
-  d.className = 'ln ' + cls;
-  var a = document.createElement('span'); a.className = 'op'; a.textContent = op;
-  var b = document.createElement('span'); b.className = 'num'; b.textContent = num;
-  var c = document.createElement('span'); c.className = 'aux'; c.textContent = aux || '';
-  d.appendChild(a); d.appendChild(b); d.appendChild(c);
-  return d;
-}
-function termLine(t){
-  var op = t.op ? SYM[t.op] : '';
-  if (t.fromAns) return mkLine('', op, tcStr(t.val), 'ANS');
-  var num = (t.neg ? '-' : '') + t.digits;
-  return mkLine('', op, num, t.kind === 'tc' ? tcStr(t.val) : '');
-}
-function refreshHint(){
-  inner.classList.toggle('has', inner.children.length > 2);
-}
-function insertCommitted(el){
-  inner.insertBefore(el, liveEl);
-  refreshHint();
+    const FF = frames % FPS;
+    const totalSec = Math.floor(frames/FPS);
+
+    const SS = totalSec % 60;
+    const totalMin = Math.floor(totalSec/60);
+
+    const MM = totalMin % 60;
+    const HH = Math.floor(totalMin/60);
+
+    const p = v => String(v).padStart(2,'0');
+
+    return `${sign}${p(HH)}:${p(MM)}:${p(SS)}:${p(FF)}`;
 }
 
-/* ================= rendering ================= */
-function renderResult(){
-  var it = terms.slice();
-  if (entry !== '') it.push(makeTerm(pendingOp, entry, entryNeg));
-  var r = it.length ? evalItems(it) : { v: ans == null ? 0 : ans };
-  if (r.err){
-    tcEl.classList.add('err'); tcEl.textContent = 'ERROR';
-    frEl.textContent = 'DIV BY ZERO / OVERFLOW'; curCopy = null;
-  } else {
-    tcEl.classList.remove('err');
-    tcEl.innerHTML = tcStr(r.v).replace(/:/g, '<i>:</i>');
-    frEl.textContent = r.v + ' frames';
-    curCopy = tcStr(r.v);
-  }
-}
-function updateLive(){
-  liveOp.textContent = pendingOp ? SYM[pendingOp] : '';
-  liveNum.textContent = (entryNeg ? '-' : '') + entry;
-  var kind = (pendingOp === '*' || pendingOp === '/') ? 'scalar' : 'tc';
-  liveAux.textContent = (entry !== '' && kind === 'tc') ? tcStr((entryNeg ? -1 : 1) * tcToFrames(entry)) : '';
-  renderResult();
-  follow();
+function updateLog(){
+
+    const scrollTop = logEl.scrollTop;
+
+    logEl.innerHTML = "";
+
+    logs.forEach(item=>{
+        const div = document.createElement("div");
+        div.className = "logItem";
+        div.textContent = item;
+        logEl.appendChild(div);
+    });
+
+    const current = document.createElement("div");
+    current.className = "logItem current";
+    current.textContent = currentInput || "";
+    logEl.appendChild(current);
+
+    logEl.scrollTop = scrollTop;
 }
 
-/* ================= actions ================= */
-function digit(d){
-  if (entry.length >= 8) return;
-  entry += d;
-  updateLive();
+function updateResult(){
+
+    try{
+
+        const expr = expression + currentInput;
+
+        if(!expr){
+            resultEl.textContent = "00:00:00:00";
+            framesEl.textContent = "0 frames";
+            return;
+        }
+
+        let converted = expr.replace(/\d+/g,m=>{
+            return digitsToFrames(m);
+        });
+
+        let value = Function('"use strict";return ('+converted+')')();
+
+        if(!isFinite(value)) return;
+
+        value = Math.round(value);
+
+        resultEl.textContent = framesToTC(value);
+        framesEl.textContent = value + " frames";
+
+    }catch(e){}
 }
-function operator(k){
-  if (entry !== ''){
-    var t = makeTerm(pendingOp, entry, entryNeg);
-    t.el = termLine(t); insertCommitted(t.el);
-    terms.push(t); entry = ''; entryNeg = false; pendingOp = k;
-  } else if (terms.length){
-    pendingOp = k;
-  } else if (ans != null){
-    var a = { op: null, digits: null, neg: false, kind: 'tc', val: ans, fromAns: true, el: null };
-    a.el = termLine(a); insertCommitted(a.el);
-    terms.push(a); pendingOp = k;
-  } else { return; }
-  updateLive();
+
+function inputDigit(d){
+    currentInput += d;
+    updateLog();
+    updateResult();
 }
-function sign(){
-  entryNeg = !entryNeg;
-  updateLive();
+
+function inputOperator(op){
+
+    if(currentInput===""){
+        if(expression==="") return;
+
+        expression = expression.replace(/[+\-*/]+$/,op);
+        return;
+    }
+
+    logs.push(currentInput);
+
+    expression += currentInput + op;
+    currentInput = "";
+
+    updateLog();
+    updateResult();
 }
+
 function backspace(){
-  if (entry !== ''){
-    entry = entry.slice(0, -1);
-  } else if (entryNeg){
-    entryNeg = false;
-  } else if (terms.length){
-    var t = terms.pop();
-    if (t.el && t.el.parentNode) t.el.parentNode.removeChild(t.el);
-    if (t.fromAns){ pendingOp = null; entry = ''; entryNeg = false; }
-    else { entry = t.digits; entryNeg = t.neg; pendingOp = t.op; }
-    refreshHint();
-  } else { return; }
-  updateLive();
-}
-function enter(){
-  var items = terms.slice(), et = null;
-  if (entry !== ''){
-    et = makeTerm(pendingOp, entry, entryNeg);
-    items.push(et);
-  }
-  if (!items.length) return;
-  var r = evalItems(items);
-  if (et){ et.el = termLine(et); insertCommitted(et.el); }
-  var line;
-  if (r.err){
-    ans = null;
-    line = mkLine('res err', '=', 'ERROR', '÷0');
-  } else {
-    ans = r.v;
-    line = mkLine('res', '=', tcStr(r.v), r.v + 'f');
-    (function(txt){
-      line.addEventListener('click', function(){ copyText(txt); });
-    })(tcStr(r.v));
-  }
-  insertCommitted(line);
-  terms = []; pendingOp = null; entry = ''; entryNeg = false;
-  updateLive();
-}
-function clr(){
-  if (entry !== '' || entryNeg){
-    entry = ''; entryNeg = false;
-  } else if (terms.length || pendingOp){
-    terms.forEach(function(t){ if (t.el && t.el.parentNode) t.el.parentNode.removeChild(t.el); });
-    terms = []; pendingOp = null;
-    refreshHint();
-  } else {
-    var kids = Array.prototype.slice.call(inner.children);
-    kids.forEach(function(el){ if (el !== liveEl && !el.classList.contains('spacer')) inner.removeChild(el); });
-    ans = null; stick = true;
-    refreshHint();
-  }
-  updateLive();
-}
-function press(k){
-  if (k.length === 1 && k >= '0' && k <= '9') digit(k);
-  else if (k === '+' || k === '-' || k === '*' || k === '/') operator(k);
-  else if (k === 'ent') enter();
-  else if (k === 'bs') backspace();
-  else if (k === 'clr') clr();
-  else if (k === 'sign') sign();
+    currentInput = currentInput.slice(0,-1);
+    updateLog();
+    updateResult();
 }
 
-/* ================= copy ================= */
-var hintTimer = null;
-function flashHint(msg){
-  hintEl.textContent = msg; hintEl.classList.add('ok');
-  clearTimeout(hintTimer);
-  hintTimer = setTimeout(function(){ hintEl.textContent = 'TAP TO COPY'; hintEl.classList.remove('ok'); }, 1300);
+function clearAll(){
+    expression="";
+    currentInput="";
+    logs=[];
+    updateLog();
+    updateResult();
 }
-function fallbackCopy(t){
-  var ta = document.createElement('textarea');
-  ta.value = t; ta.readOnly = true;
-  ta.style.cssText = 'position:fixed;left:-1000px;top:0;opacity:0;font-size:16px';
-  document.body.appendChild(ta);
-  ta.select();
-  try { ta.setSelectionRange(0, t.length); } catch(e){}
-  var ok = false;
-  try { ok = document.execCommand('copy'); } catch(e){}
-  document.body.removeChild(ta);
-  return ok;
-}
-function copyText(t){
-  if (!t){ return; }
-  var done = function(ok){ flashHint(ok ? 'COPIED  ' + t : 'COPY FAILED'); if (ok && navigator.vibrate) navigator.vibrate(12); };
-  if (navigator.clipboard && window.isSecureContext){
-    navigator.clipboard.writeText(t).then(function(){ done(true); }, function(){ done(fallbackCopy(t)); });
-  } else {
-    done(fallbackCopy(t));
-  }
-}
-panelEl.addEventListener('click', function(){ copyText(curCopy); });
 
-/* ================= keypad events ================= */
-var repTimer = null, repInt = null;
-function stopRepeat(){ clearTimeout(repTimer); clearInterval(repInt); repTimer = repInt = null; }
-Array.prototype.forEach.call(document.querySelectorAll('.k'), function(b){
-  var k = b.getAttribute('data-k');
-  b.addEventListener('pointerdown', function(e){
-    e.preventDefault();
-    try { b.setPointerCapture(e.pointerId); } catch(err){}
-    b.classList.add('down');
-    if (navigator.vibrate) navigator.vibrate(6);
-    press(k);
-    if (k === 'bs'){
-      stopRepeat();
-      repTimer = setTimeout(function(){ repInt = setInterval(function(){ press('bs'); }, 70); }, 420);
+function toggleSign(){
+
+    if(!currentInput) return;
+
+    if(currentInput.startsWith("-")){
+        currentInput=currentInput.slice(1);
+    }else{
+        currentInput="-"+currentInput;
     }
-  });
-  var up = function(){ b.classList.remove('down'); if (k === 'bs') stopRepeat(); };
-  b.addEventListener('pointerup', up);
-  b.addEventListener('pointercancel', up);
-  b.addEventListener('lostpointercapture', up);
-  b.addEventListener('contextmenu', function(e){ e.preventDefault(); });
-  b.addEventListener('click', function(e){ e.preventDefault(); });
+
+    updateLog();
+    updateResult();
+}
+
+function enterResult(){
+
+    if(currentInput){
+        logs.push(currentInput);
+    }
+
+    try{
+
+        const expr=(expression+currentInput);
+
+        if(!expr){
+            updateLog();
+            return;
+        }
+
+        let converted = expr.replace(/\d+/g,m=>{
+            return digitsToFrames(m);
+        });
+
+        let value = Function('"use strict";return ('+converted+')')();
+
+        if(!isFinite(value)) return;
+
+        value = Math.round(value);
+
+        logs.push("= " + framesToTC(value));
+
+        expression="";
+        currentInput=String(value);
+
+        updateLog();
+        updateResult();
+
+    }catch(e){}
+}
+
+document.querySelectorAll("[data-key]").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+        const key = btn.dataset.key;
+
+        if(/[0-9]/.test(key)){
+            inputDigit(key);
+        }else{
+            inputOperator(key);
+        }
+    });
 });
 
-/* ================= zoom / gesture guards ================= */
-['gesturestart','gesturechange','gestureend'].forEach(function(n){
-  document.addEventListener(n, function(e){ e.preventDefault(); }, { passive: false });
-});
-document.addEventListener('touchmove', function(e){
-  if (e.touches && e.touches.length > 1) e.preventDefault();
-}, { passive: false });
-var lastTouch = 0;
-$('#pad').addEventListener('touchend', function(e){
-  var now = Date.now();
-  if (now - lastTouch <= 350) e.preventDefault();
-  lastTouch = now;
-}, { passive: false });
-document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
-document.addEventListener('dblclick', function(e){ e.preventDefault(); });
-document.addEventListener('wheel', function(e){ if (e.ctrlKey) e.preventDefault(); }, { passive: false });
+document.getElementById("back").addEventListener("click",backspace);
+document.getElementById("clr").addEventListener("click",clearAll);
+document.getElementById("ent").addEventListener("click",enterResult);
+document.getElementById("sign").addEventListener("click",toggleSign);
 
-/* ================= hardware keyboard (desktop testing) ================= */
-window.addEventListener('keydown', function(e){
-  if (e.metaKey || e.ctrlKey || e.altKey) return;
-  var k = e.key;
-  if (/^[0-9]$/.test(k)) press(k);
-  else if (k === '+' || k === '-' || k === '*' || k === '/') press(k);
-  else if (k === 'x' || k === 'X') press('*');
-  else if (k === 'Enter' || k === '=') press('ent');
-  else if (k === 'Backspace') press('bs');
-  else if (k === 'Escape' || k === 'Delete') press('clr');
-  else return;
-  e.preventDefault();
+resultEl.addEventListener("click",async()=>{
+    const txt = resultEl.textContent;
+
+    try{
+        await navigator.clipboard.writeText(txt);
+        copyMsg.textContent="COPIED";
+        setTimeout(()=>copyMsg.textContent="",1000);
+    }catch(e){}
 });
 
-/* ================= init ================= */
-refreshHint();
-updateLive();
-logEl.scrollTop = logEl.scrollHeight;
-})();
+updateLog();
+updateResult();
 </script>
+
 </body>
 </html>
