@@ -19,14 +19,18 @@
   margin:0;
   padding:0;
   box-sizing:border-box;
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+}
+
+html,body{
+  height:100%;
 }
 
 body{
   background:var(--bg);
   color:white;
-  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
-  padding:10px;
-  overflow:hidden;
+  padding:8px;
+  padding-bottom:360px;
 }
 
 .resultBox{
@@ -38,18 +42,18 @@ body{
 
   background:#000;
 
-  border-radius:18px;
+  border-radius:16px;
 
-  padding:15px;
+  padding:12px;
 
   text-align:center;
 
-  margin-bottom:10px;
+  margin-bottom:8px;
 }
 
 .result{
 
-  font-size:min(12vw,52px);
+  font-size:min(9vw,42px);
 
   font-family:Consolas,monospace;
 
@@ -60,66 +64,92 @@ body{
 
 .frames{
 
-  margin-top:6px;
+  margin-top:4px;
 
   color:#aaa;
 
-  font-size:14px;
+  font-size:12px;
 }
 
 .copy{
 
-  margin-top:4px;
-
-  font-size:12px;
+  margin-top:2px;
 
   color:var(--accent);
+
+  font-size:11px;
+}
+
+.log{
+
+  background:var(--panel);
+
+  border-radius:12px;
+
+  padding:10px;
+
+  height:260px;
+
+  overflow-y:auto;
+
+  font-size:18px;
+
+  line-height:1.4;
+}
+
+.line{
+
+  border-bottom:1px solid #444;
+
+  padding:4px 0;
+
+  word-break:break-all;
 }
 
 .current{
 
-  background:#111;
+  color:var(--result);
 
-  border-radius:14px;
-
-  padding:12px;
-
-  margin-bottom:10px;
-
-  font-size:36px;
-
-  text-align:right;
-
-  min-height:66px;
+  font-weight:700;
 }
 
 .keypad{
 
+  position:fixed;
+
+  left:8px;
+  right:8px;
+
+  bottom:max(8px, env(safe-area-inset-bottom));
+
+  z-index:999;
+
+  background:var(--bg);
+
+  padding-top:8px;
+
   display:grid;
 
-  grid-template-columns:
-  repeat(3,1fr);
+  grid-template-columns:repeat(3,1fr);
 
-  gap:8px;
-
-  margin-bottom:10px;
+  gap:6px;
 }
 
 .keypad button{
 
-  height:60px;
+  height:48px;
 
   border:none;
 
-  border-radius:12px;
-
-  font-size:28px;
-
-  font-weight:700;
+  border-radius:10px;
 
   background:#454545;
 
   color:white;
+
+  font-size:22px;
+
+  font-weight:700;
 }
 
 .keypad button:active{
@@ -133,30 +163,6 @@ body{
 
 .clear{
   background:#d32f2f !important;
-}
-
-.log{
-
-  background:var(--panel);
-
-  border-radius:14px;
-
-  padding:12px;
-
-  height:120px;
-
-  overflow-y:auto;
-
-  font-size:22px;
-
-  line-height:1.5;
-}
-
-.line{
-
-  border-bottom:1px solid #444;
-
-  padding:2px 0;
 }
 
 </style>
@@ -188,9 +194,8 @@ class="copy">
 </div>
 
 <div
-id="current"
-class="current">
-0
+id="log"
+class="log">
 </div>
 
 <div class="keypad">
@@ -221,11 +226,6 @@ class="current">
 
 </div>
 
-<div
-id="log"
-class="log">
-</div>
-
 <script>
 
 const FPS = 30;
@@ -235,277 +235,291 @@ let lines = [];
 
 function addDigit(n){
 
-  current += n;
-
-  refresh();
+    current += n;
+    refresh();
 }
 
 function appendOperator(op){
 
-  if(current==="") return;
+    if(current === "") return;
 
-  const last =
-    current.slice(-1);
+    const last =
+        current.slice(-1);
 
-  if("+-*/".includes(last)){
+    if("+-*/".includes(last)){
 
-    current =
-      current.slice(0,-1)+op;
+        current =
+            current.slice(0,-1)
+            + op;
 
-  }else{
+    }else{
 
-    current += op;
-  }
+        current += op;
+    }
 
-  refresh();
+    refresh();
 }
 
 function toggleMinus(){
 
-  if(current.startsWith("-")){
+    if(current.startsWith("-")){
 
-    current =
-      current.substring(1);
+        current =
+            current.substring(1);
 
-  }else{
+    }else{
 
-    current =
-      "-" + current;
-  }
+        current =
+            "-" + current;
+    }
 
-  refresh();
+    refresh();
 }
 
 function backspace(){
 
-  current =
-    current.slice(0,-1);
+    current =
+        current.slice(0,-1);
 
-  refresh();
+    refresh();
 }
 
 function enterLine(){
 
-  if(current==="") return;
+    if(current === "") return;
 
-  lines.push(current);
+    lines.unshift(current);
 
-  current="";
+    current = "";
 
-  refresh();
+    refresh();
 }
 
 function clearAll(){
 
-  current="";
-  lines=[];
+    current="";
+    lines=[];
 
-  refresh();
+    refresh();
 }
 
 function refresh(){
 
-  document.getElementById("current").innerText =
-    current || "0";
+    const html=[];
 
-  document.getElementById("log").innerHTML =
+    if(current !== ""){
 
-    lines
-      .map(
-        x=>`<div class="line">${x}</div>`
-      )
-      .join("");
+        html.push(
+        `<div class="line current">${current}</div>`
+        );
+    }
 
-  recalc();
+    lines.forEach(line=>{
+
+        html.push(
+        `<div class="line">${line}</div>`
+        );
+    });
+
+    document.getElementById("log").innerHTML =
+        html.join("");
+
+    recalc();
 }
 
 function parseValue(v){
 
-  if(v.length<=2){
+    if(v.length<=2){
 
-    return Number(v)*FPS;
-  }
+        return Number(v)*FPS;
+    }
 
-  if(v.length<=4){
+    if(v.length<=4){
 
-    const mm=
-      parseInt(v.slice(0,-2))||0;
+        const mm=
+        parseInt(v.slice(0,-2))||0;
 
-    const ss=
-      parseInt(v.slice(-2))||0;
+        const ss=
+        parseInt(v.slice(-2))||0;
 
-    return (mm*60+ss)*FPS;
-  }
+        return (
+            mm*60+
+            ss
+        )*FPS;
+    }
 
-  if(v.length<=6){
+    if(v.length<=6){
 
-    const hh=
-      parseInt(v.slice(0,-4))||0;
+        const hh=
+        parseInt(v.slice(0,-4))||0;
 
-    const mm=
-      parseInt(v.slice(-4,-2))||0;
+        const mm=
+        parseInt(v.slice(-4,-2))||0;
 
-    const ss=
-      parseInt(v.slice(-2))||0;
+        const ss=
+        parseInt(v.slice(-2))||0;
 
-    return(
-      hh*3600+
-      mm*60+
-      ss
-    )*FPS;
-  }
+        return (
+            hh*3600+
+            mm*60+
+            ss
+        )*FPS;
+    }
 
-  v=v.padStart(8,"0");
+    v=v.padStart(8,"0");
 
-  const hh=parseInt(v.slice(0,2));
-  const mm=parseInt(v.slice(2,4));
-  const ss=parseInt(v.slice(4,6));
-  const ff=parseInt(v.slice(6,8));
+    const hh=parseInt(v.slice(0,2));
+    const mm=parseInt(v.slice(2,4));
+    const ss=parseInt(v.slice(4,6));
+    const ff=parseInt(v.slice(6,8));
 
-  return(
-    hh*3600*FPS+
-    mm*60*FPS+
-    ss*FPS+
-    ff
-  );
+    return (
+        hh*3600*FPS+
+        mm*60*FPS+
+        ss*FPS+
+        ff
+    );
 }
 
 function evaluate(exp){
 
-  const tokens =
-    exp.match(/\d+|[+\-*/]/g);
+    const tokens =
+        exp.match(/\d+|[+\-*/]/g);
 
-  if(!tokens) return 0;
+    if(!tokens) return 0;
 
-  let total=null;
-  let op="+";
+    let total=null;
+    let op="+";
 
-  for(const t of tokens){
+    for(const t of tokens){
 
-    if("+-*/".includes(t)){
+        if("+-*/".includes(t)){
 
-      op=t;
-      continue;
+            op=t;
+            continue;
+        }
+
+        let value;
+
+        if(
+            total!==null &&
+            (op==="*" || op==="/")
+        ){
+
+            value=Number(t);
+
+        }else{
+
+            value=parseValue(t);
+        }
+
+        if(total===null){
+
+            total=value;
+            continue;
+        }
+
+        switch(op){
+
+            case "+":
+                total+=value;
+                break;
+
+            case "-":
+                total-=value;
+                break;
+
+            case "*":
+                total*=value;
+                break;
+
+            case "/":
+                total/=value;
+                break;
+        }
     }
 
-    let value;
-
-    if(
-      total!==null &&
-      (op==="*"||op==="/")
-    ){
-
-      value=Number(t);
-
-    }else{
-
-      value=parseValue(t);
-    }
-
-    if(total===null){
-
-      total=value;
-      continue;
-    }
-
-    switch(op){
-
-      case "+":
-        total+=value;
-        break;
-
-      case "-":
-        total-=value;
-        break;
-
-      case "*":
-        total*=value;
-        break;
-
-      case "/":
-        total/=value;
-        break;
-    }
-  }
-
-  return Math.round(total||0);
+    return Math.round(total||0);
 }
 
 function recalc(){
 
-  let total=0;
+    let total=0;
 
-  lines.forEach(line=>{
+    lines.forEach(line=>{
 
-    total+=evaluate(line);
+        total+=evaluate(line);
 
-  });
+    });
 
-  document.getElementById("result").innerText =
-    framesToTC(total);
+    document.getElementById("result").innerText =
+        framesToTC(total);
 
-  document.getElementById("frames").innerText =
-    total.toLocaleString()
-    +" frames";
+    document.getElementById("frames").innerText =
+        total.toLocaleString()
+        + " frames";
 }
 
 function framesToTC(frames){
 
-  let sign="";
+    let sign="";
 
-  if(frames<0){
+    if(frames<0){
 
-    sign="-";
+        sign="-";
+        frames=Math.abs(frames);
+    }
 
-    frames=Math.abs(frames);
-  }
+    const hh=
+        Math.floor(
+        frames/(3600*FPS));
 
-  const hh=
-    Math.floor(frames/(3600*FPS));
+    frames%=3600*FPS;
 
-  frames%=(3600*FPS);
+    const mm=
+        Math.floor(
+        frames/(60*FPS));
 
-  const mm=
-    Math.floor(frames/(60*FPS));
+    frames%=60*FPS;
 
-  frames%=(60*FPS);
+    const ss=
+        Math.floor(
+        frames/FPS);
 
-  const ss=
-    Math.floor(frames/FPS);
+    const ff=
+        frames%FPS;
 
-  const ff=
-    frames%FPS;
-
-  return(
-    sign+
-    String(hh).padStart(2,"0")+":"+
-    String(mm).padStart(2,"0")+":"+
-    String(ss).padStart(2,"0")+":"+
-    String(ff).padStart(2,"0")
-  );
+    return (
+        sign+
+        String(hh).padStart(2,"0")+":"+
+        String(mm).padStart(2,"0")+":"+
+        String(ss).padStart(2,"0")+":"+
+        String(ff).padStart(2,"0")
+    );
 }
 
 async function copyResult(){
 
-  try{
+    try{
 
-    await navigator.clipboard.writeText(
-      document.getElementById("result").innerText
-    );
+        await navigator.clipboard.writeText(
+            document.getElementById("result").innerText
+        );
 
-    const obj =
-      document.getElementById("copy");
+        const obj =
+            document.getElementById("copy");
 
-    obj.innerText="コピーしました";
+        obj.innerText =
+            "コピーしました";
 
-    setTimeout(()=>{
+        setTimeout(()=>{
 
-      obj.innerText=
-      "タップでコピー";
+            obj.innerText =
+                "タップでコピー";
 
-    },1500);
+        },1500);
 
-  }catch(e){}
+    }catch(e){}
 }
 
 refresh();
