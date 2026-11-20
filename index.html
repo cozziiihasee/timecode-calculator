@@ -14,24 +14,25 @@
     --orange:#ff9800;
     --text:#e0e0e0;
     --border:#3b3b3b;
-    --safe-bottom: env(safe-area-inset-bottom,0px);
+    --safe-bottom:env(safe-area-inset-bottom,0px);
 }
 
 *{
-    box-sizing:border-box;
     margin:0;
     padding:0;
+    box-sizing:border-box;
     -webkit-tap-highlight-color:transparent;
     touch-action:manipulation;
 }
 
-html,body{
+html,
+body{
     width:100%;
     height:100%;
     overflow:hidden;
     background:var(--bg);
     color:var(--text);
-    font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
+    font-family:-apple-system,BlinkMacSystemFont,Helvetica,sans-serif;
 }
 
 body{
@@ -47,40 +48,39 @@ body{
     overflow:hidden;
 }
 
-/* ===== RESULT ===== */
+/* RESULT */
 
 #resultPanel{
-    flex:0 0 auto;
+    flex-shrink:0;
     background:#111;
     border-bottom:1px solid var(--border);
-    padding:12px;
+    padding:8px;
 }
 
 #result{
-    text-align:center;
-    font-weight:700;
     color:var(--green);
-    font-size:clamp(28px,6vw,42px);
+    text-align:center;
+    font-size:30px;
+    font-weight:700;
     line-height:1.1;
-    word-break:break-all;
 }
 
 #frames{
-    margin-top:6px;
     text-align:center;
-    color:#bbb;
-    font-size:15px;
+    color:#aaa;
+    font-size:13px;
+    margin-top:2px;
 }
 
 #copyMsg{
-    margin-top:4px;
+    height:12px;
     text-align:center;
+    font-size:11px;
     color:var(--orange);
-    font-size:12px;
-    height:14px;
+    margin-top:2px;
 }
 
-/* ===== LOG ===== */
+/* LOG */
 
 #logWrap{
     flex:1;
@@ -91,15 +91,14 @@ body{
 #log{
     height:100%;
     overflow-y:auto;
-    padding:12px;
     -webkit-overflow-scrolling:touch;
+    padding:10px;
 }
 
 .logItem{
-    padding:6px 4px;
+    padding:8px 4px;
     font-size:20px;
-    color:#d0d0d0;
-    border-bottom:1px solid rgba(255,255,255,0.04);
+    border-bottom:1px solid rgba(255,255,255,.05);
     word-break:break-all;
 }
 
@@ -108,38 +107,38 @@ body{
     font-weight:700;
 }
 
-/* ===== KEYPAD ===== */
+/* KEYPAD */
 
 #keypad{
-    flex:0 0 auto;
-    background:#222;
-    padding:8px;
-    padding-bottom:calc(8px + var(--safe-bottom));
+    flex-shrink:0;
+    background:#202020;
     border-top:1px solid var(--border);
+    padding:6px;
+    padding-bottom:calc(6px + var(--safe-bottom));
 }
 
 .grid{
     display:grid;
     grid-template-columns:repeat(3,1fr);
-    gap:8px;
+    gap:6px;
 }
 
 button{
-    height:58px;
     border:none;
     border-radius:10px;
     background:#333;
     color:#fff;
-    font-size:24px;
+    font-size:18px;
     font-weight:700;
+    height:44px;
 }
 
 button:active{
-    transform:scale(0.96);
+    transform:scale(.96);
 }
 
 .op{
-    background:#4a4a4a;
+    background:#444;
     color:var(--orange);
 }
 
@@ -149,7 +148,7 @@ button:active{
 }
 
 .clr{
-    background:#b00020;
+    background:#991b1b;
 }
 </style>
 </head>
@@ -170,179 +169,207 @@ button:active{
 
     <div id="keypad">
         <div class="grid">
-            <button data-key="1">1</button>
-            <button data-key="2">2</button>
-            <button data-key="3">3</button>
 
-            <button data-key="4">4</button>
-            <button data-key="5">5</button>
-            <button data-key="6">6</button>
+            <button data-num="1">1</button>
+            <button data-num="2">2</button>
+            <button data-num="3">3</button>
 
-            <button data-key="7">7</button>
-            <button data-key="8">8</button>
-            <button data-key="9">9</button>
+            <button data-num="4">4</button>
+            <button data-num="5">5</button>
+            <button data-num="6">6</button>
+
+            <button data-num="7">7</button>
+            <button data-num="8">8</button>
+            <button data-num="9">9</button>
 
             <button id="sign">±</button>
-            <button data-key="0">0</button>
+            <button data-num="0">0</button>
             <button id="back">⌫</button>
 
-            <button class="op" data-key="*">×</button>
-            <button class="op" data-key="/">÷</button>
+            <button class="op" data-op="*">×</button>
+            <button class="op" data-op="/">÷</button>
             <button class="ent" id="ent">ENT</button>
 
             <button class="clr" id="clr">CLR</button>
-            <button class="op" data-key="+">+</button>
-            <button class="op" data-key="-">-</button>
+            <button class="op" data-op="+">+</button>
+            <button class="op" data-op="-">-</button>
+
         </div>
     </div>
 
 </div>
 
 <script>
-document.addEventListener('gesturestart', e=>e.preventDefault());
-document.addEventListener('dblclick', e=>e.preventDefault());
+document.addEventListener('gesturestart',e=>e.preventDefault());
+document.addEventListener('dblclick',e=>e.preventDefault());
 
-const FPS = 30;
+const FPS=30;
 
-const resultEl = document.getElementById('result');
-const framesEl = document.getElementById('frames');
-const logEl = document.getElementById('log');
-const copyMsg = document.getElementById('copyMsg');
+const resultEl=document.getElementById('result');
+const framesEl=document.getElementById('frames');
+const copyMsg=document.getElementById('copyMsg');
+const logEl=document.getElementById('log');
 
-let expression = "";
-let currentInput = "";
-let logs = [];
+let expression="";
+let currentInput="";
+let logs=[];
 
-function digitsToFrames(str){
+function digitsToFrames(num){
 
-    str = String(Math.abs(parseInt(str || "0",10)));
+    num=String(Math.abs(parseInt(num||"0",10)));
 
-    let HH=0,MM=0,SS=0,FF=0;
+    let hh=0;
+    let mm=0;
+    let ss=0;
+    let ff=0;
 
-    if(str.length<=2){
-        FF = parseInt(str||0,10);
+    if(num.length<=2){
+
+        ff=parseInt(num||0,10);
+
+    }else if(num.length<=4){
+
+        ff=parseInt(num.slice(-2),10);
+        ss=parseInt(num.slice(0,-2)||0,10);
+
+    }else if(num.length<=6){
+
+        ff=parseInt(num.slice(-2),10);
+        ss=parseInt(num.slice(-4,-2)||0,10);
+        mm=parseInt(num.slice(0,-4)||0,10);
+
+    }else{
+
+        ff=parseInt(num.slice(-2),10);
+        ss=parseInt(num.slice(-4,-2)||0,10);
+        mm=parseInt(num.slice(-6,-4)||0,10);
+        hh=parseInt(num.slice(0,-6)||0,10);
     }
-    else if(str.length<=4){
-        FF = parseInt(str.slice(-2),10);
-        SS = parseInt(str.slice(0,-2)||0,10);
-    }
-    else if(str.length<=6){
-        FF = parseInt(str.slice(-2),10);
-        SS = parseInt(str.slice(-4,-2)||0,10);
-        MM = parseInt(str.slice(0,-4)||0,10);
-    }
-    else{
-        FF = parseInt(str.slice(-2),10);
-        SS = parseInt(str.slice(-4,-2)||0,10);
-        MM = parseInt(str.slice(-6,-4)||0,10);
-        HH = parseInt(str.slice(0,-6)||0,10);
-    }
 
-    return (((HH*60+MM)*60)+SS)*FPS + FF;
+    return (((hh*60+mm)*60)+ss)*FPS+ff;
 }
 
 function framesToTC(frames){
 
-    let sign = frames < 0 ? "-" : "";
-    frames = Math.abs(Math.round(frames));
+    let sign="";
 
-    const FF = frames % FPS;
-    const totalSec = Math.floor(frames/FPS);
+    if(frames<0){
+        sign="-";
+        frames=Math.abs(frames);
+    }
 
-    const SS = totalSec % 60;
-    const totalMin = Math.floor(totalSec/60);
+    frames=Math.round(frames);
 
-    const MM = totalMin % 60;
-    const HH = Math.floor(totalMin/60);
+    let ff=frames%FPS;
+    let totalSec=Math.floor(frames/FPS);
 
-    const p = v => String(v).padStart(2,'0');
+    let ss=totalSec%60;
+    let totalMin=Math.floor(totalSec/60);
 
-    return `${sign}${p(HH)}:${p(MM)}:${p(SS)}:${p(FF)}`;
+    let mm=totalMin%60;
+    let hh=Math.floor(totalMin/60);
+
+    const p=v=>String(v).padStart(2,"0");
+
+    return sign+
+        p(hh)+":"+
+        p(mm)+":"+
+        p(ss)+":"+
+        p(ff);
 }
 
-function updateLog(){
+function evaluateExpression(){
 
-    const scrollTop = logEl.scrollTop;
+    const expr=expression+currentInput;
 
-    logEl.innerHTML = "";
+    if(!expr){
+        return 0;
+    }
 
-    logs.forEach(item=>{
-        const div = document.createElement("div");
-        div.className = "logItem";
-        div.textContent = item;
-        logEl.appendChild(div);
-    });
+    const converted=expr.replace(/\d+/g,m=>digitsToFrames(m));
 
-    const current = document.createElement("div");
-    current.className = "logItem current";
-    current.textContent = currentInput || "";
-    logEl.appendChild(current);
-
-    logEl.scrollTop = scrollTop;
+    return Math.round(
+        Function('"use strict";return ('+converted+')')()
+    );
 }
 
 function updateResult(){
 
     try{
 
-        const expr = expression + currentInput;
+        const frames=evaluateExpression();
 
-        if(!expr){
-            resultEl.textContent = "00:00:00:00";
-            framesEl.textContent = "0 frames";
-            return;
-        }
-
-        let converted = expr.replace(/\d+/g,m=>{
-            return digitsToFrames(m);
-        });
-
-        let value = Function('"use strict";return ('+converted+')')();
-
-        if(!isFinite(value)) return;
-
-        value = Math.round(value);
-
-        resultEl.textContent = framesToTC(value);
-        framesEl.textContent = value + " frames";
+        resultEl.textContent=framesToTC(frames);
+        framesEl.textContent=frames+" frames";
 
     }catch(e){}
 }
 
-function inputDigit(d){
-    currentInput += d;
+function updateLog(){
+
+    const pos=logEl.scrollTop;
+
+    logEl.innerHTML="";
+
+    logs.forEach(v=>{
+
+        const div=document.createElement("div");
+        div.className="logItem";
+        div.textContent=v;
+        logEl.appendChild(div);
+
+    });
+
+    const cur=document.createElement("div");
+    cur.className="logItem current";
+    cur.textContent=currentInput;
+    logEl.appendChild(cur);
+
+    logEl.scrollTop=pos;
+}
+
+function appendNumber(n){
+
+    currentInput+=n;
+
     updateLog();
     updateResult();
 }
 
-function inputOperator(op){
+function appendOperator(op){
 
     if(currentInput===""){
+
         if(expression==="") return;
 
-        expression = expression.replace(/[+\-*/]+$/,op);
+        expression=expression.replace(/[+\-*/]+$/,op);
         return;
     }
 
     logs.push(currentInput);
 
-    expression += currentInput + op;
-    currentInput = "";
+    expression+=currentInput+op;
+
+    currentInput="";
 
     updateLog();
     updateResult();
 }
 
 function backspace(){
-    currentInput = currentInput.slice(0,-1);
+
+    currentInput=currentInput.slice(0,-1);
+
     updateLog();
     updateResult();
 }
 
 function clearAll(){
+
     expression="";
     currentInput="";
     logs=[];
+
     updateLog();
     updateResult();
 }
@@ -352,7 +379,7 @@ function toggleSign(){
     if(!currentInput) return;
 
     if(currentInput.startsWith("-")){
-        currentInput=currentInput.slice(1);
+        currentInput=currentInput.substring(1);
     }else{
         currentInput="-"+currentInput;
     }
@@ -361,35 +388,16 @@ function toggleSign(){
     updateResult();
 }
 
-function enterResult(){
-
-    if(currentInput){
-        logs.push(currentInput);
-    }
+function enter(){
 
     try{
 
-        const expr=(expression+currentInput);
+        const frames=evaluateExpression();
 
-        if(!expr){
-            updateLog();
-            return;
-        }
-
-        let converted = expr.replace(/\d+/g,m=>{
-            return digitsToFrames(m);
-        });
-
-        let value = Function('"use strict";return ('+converted+')')();
-
-        if(!isFinite(value)) return;
-
-        value = Math.round(value);
-
-        logs.push("= " + framesToTC(value));
+        logs.push(framesToTC(frames));
 
         expression="";
-        currentInput=String(value);
+        currentInput=String(frames);
 
         updateLog();
         updateResult();
@@ -397,30 +405,43 @@ function enterResult(){
     }catch(e){}
 }
 
-document.querySelectorAll("[data-key]").forEach(btn=>{
-    btn.addEventListener("click",()=>{
-        const key = btn.dataset.key;
+document.querySelectorAll("[data-num]").forEach(btn=>{
 
-        if(/[0-9]/.test(key)){
-            inputDigit(key);
-        }else{
-            inputOperator(key);
-        }
+    btn.addEventListener("click",()=>{
+
+        appendNumber(btn.dataset.num);
+
     });
+
+});
+
+document.querySelectorAll("[data-op]").forEach(btn=>{
+
+    btn.addEventListener("click",()=>{
+
+        appendOperator(btn.dataset.op);
+
+    });
+
 });
 
 document.getElementById("back").addEventListener("click",backspace);
 document.getElementById("clr").addEventListener("click",clearAll);
-document.getElementById("ent").addEventListener("click",enterResult);
 document.getElementById("sign").addEventListener("click",toggleSign);
+document.getElementById("ent").addEventListener("click",enter);
 
 resultEl.addEventListener("click",async()=>{
-    const txt = resultEl.textContent;
 
     try{
-        await navigator.clipboard.writeText(txt);
+
+        await navigator.clipboard.writeText(resultEl.textContent);
+
         copyMsg.textContent="COPIED";
-        setTimeout(()=>copyMsg.textContent="",1000);
+
+        setTimeout(()=>{
+            copyMsg.textContent="";
+        },1000);
+
     }catch(e){}
 });
 
